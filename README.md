@@ -26,7 +26,7 @@ A small backend service demonstrating clean architecture, idempotent checkout cr
 1. **Clone the repository**
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/bjamesy/checkout-demo.git
 cd checkout-demo
 ```
 
