@@ -1,90 +1,115 @@
-Checkout Demo (NestJS + Prisma + SQLite)
+# Checkout Demo (NestJS + Prisma + SQLite)
 
 A small backend service demonstrating clean architecture, idempotent checkout creation, and asynchronous payment processing.
 
-Features
+---
 
-POST /checkouts – Create a checkout (idempotent by merchantId + idempotencyKey).
+## Features
 
-GET /checkouts/:id – Get the current status of a checkout.
+- **POST /checkouts** – Create a checkout (idempotent by `merchantId + idempotencyKey`).  
+- **GET /checkouts/:id** – Get the current status of a checkout.  
+- **POST /checkouts/:id/pay** – Simulate asynchronous payment processing (status updates to `COMPLETED` or `FAILED`).
 
-POST /checkouts/:id/pay – Simulate asynchronous payment processing (status updates to COMPLETED or FAILED).
+---
 
-Tech Stack
+## Tech Stack
 
-NestJS – Backend framework with module/controller/service separation
+- **NestJS** – Backend framework with module/controller/service separation  
+- **Prisma ORM** – Database access layer  
+- **SQLite** – In-memory or file-based database for simplicity  
+- **TypeScript** – Type safety and maintainable code
 
-Prisma ORM – Database access layer
+---
 
-SQLite – In-memory or file-based database for simplicity
+## Setup
 
-TypeScript – Type safety and clean code
+1. **Clone the repository**
 
-Setup
-
-Clone repository:
-
+```bash
 git clone <repo-url>
 cd checkout-demo
+```
 
+2. **Install dependencies**
 
-Install dependencies:
-
+```bash
 npm install
+```
 
+3. **Create a `.env` file** in the project root:
 
-Create .env in project root:
+```env
+DATABASE_URL="file:./dev.db" # or in-memory: file:./dev.db?mode=memory&cache=shared
+```
 
-DATABASE_URL="file:./dev.db"  # or use in-memory: file:./dev.db?mode=memory&cache=shared
+4. **Run Prisma migrations**
 
-
-Run Prisma migrations:
-
+```bash
 npx prisma migrate dev --name init
 npx prisma generate
+```
 
+5. **Start the server**
 
-Start the server:
-
+```bash
 npm run start:dev
+```
 
-API Example
+---
 
-Create Checkout
+## API Examples
 
+### 1. Create Checkout
+
+```bash
 curl -X POST http://localhost:3000/checkouts \
   -H "Content-Type: application/json" \
-  -d '{"merchantId":"m123","amount":1000,"currency":"USD","idempotencyKey":"abc123"}'
+  -d '{
+        "merchantId":"m123",
+        "amount":1000,
+        "currency":"USD",
+        "idempotencyKey":"abc123"
+      }'
+```
 
+### 2. Get Checkout Status
 
-Get Checkout Status
-
+```bash
 curl http://localhost:3000/checkouts/<checkout_id>
+```
 
+### 3. Process Payment
 
-Process Payment
-
+```bash
 curl -X POST http://localhost:3000/checkouts/<checkout_id>/pay
+```
 
+> The checkout status will update asynchronously after ~1 second.
 
-Status will update asynchronously after ~1 second.
+---
 
-Design Decisions
+## Design Decisions
 
-Idempotency – enforced with a database unique constraint (merchantId + idempotencyKey) and catch on P2002 errors.
+- **Idempotency** – Enforced using a **database unique constraint** (`merchantId + idempotencyKey`) with Prisma error handling.  
+- **Async processing** – `setTimeout` simulates background payment processing; simple but demonstrates asynchronous logic.  
+- **SQLite** – Lightweight and easy to set up; can be in-memory for tests or file-based for persistence.  
+- **PrismaService** – Provides dependency injection for the Prisma client and clean separation from controllers.  
+- **DTO validation** – Ensures incoming requests are validated using `class-validator`.
 
-Async processing – setTimeout simulates background payment processing; simple but effective for take-home.
+---
 
-SQLite – lightweight, easy to set up, can be in-memory or file-based.
+## Notes
 
-PrismaService – wraps Prisma client for dependency injection and clean separation.
+- No real payment provider integration.  
+- No authentication or frontend — backend logic only.  
+- Code follows idiomatic NestJS structure for readability and maintainability.
 
-DTO validation – ensures incoming requests are correct using class-validator.
+---
 
-Notes
+## Testing Idempotency & Async
 
-No real payment provider integration.
+1. Send the **same POST /checkouts** request twice — it should return the **same checkout**.  
+2. Send **POST /checkouts/:id/pay** to trigger async payment.  
+3. Immediately GET `/checkouts/:id` — status will be `PENDING`.  
+4. Wait ~1 second, GET again — status should update to `COMPLETED` or `FAILED`.
 
-No authentication or frontend — backend logic only.
-
-Clean, maintainable code with NestJS idiomatic structure.
