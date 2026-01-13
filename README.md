@@ -84,7 +84,7 @@ curl http://localhost:3000/checkouts/<checkout_id>
 curl -X POST http://localhost:3000/checkouts/<checkout_id>/pay
 ```
 
-> The checkout status will update asynchronously after ~1 second.
+> The checkout status will update asynchronously after ~2 seconds.
 
 ---
 
