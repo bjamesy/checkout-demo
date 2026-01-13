@@ -8,7 +8,7 @@ A small backend service demonstrating clean architecture, idempotent checkout cr
 
 - **POST /checkouts** – Create a checkout (idempotent by `merchantId + idempotencyKey`).  
 - **GET /checkouts/:id** – Get the current status of a checkout.  
-- **POST /checkouts/:id/pay** – Simulate asynchronous payment processing (status updates to `COMPLETED` or `FAILED`).
+- **POST /checkouts/:id/pay** – Simulate asynchronous payment processing (status updates to `PROCESSING` then `COMPLETED` or `FAILED`).
 
 ---
 
