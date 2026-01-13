@@ -91,7 +91,8 @@ curl -X POST http://localhost:3000/checkouts/<checkout_id>/pay
 ## Design Decisions
 
 - **Idempotency** – Enforced using a **database unique constraint** (`merchantId + idempotencyKey`) with Prisma error handling.  
-- **Async processing** – `setTimeout` simulates background payment processing; simple but demonstrates asynchronous logic.  
+- **Async processing** – `setTimeout` simulates background payment processing; simple but demonstrates asynchronous logic.
+- **Retry Safety** - Processing status prevents multiple successful payments edgecase
 - **SQLite** – Lightweight and easy to set up; can be in-memory for tests or file-based for persistence.  
 - **PrismaService** – Provides dependency injection for the Prisma client and clean separation from controllers.  
 - **DTO validation** – Ensures incoming requests are validated using `class-validator`.
