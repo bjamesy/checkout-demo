@@ -1,4 +1,6 @@
-import { IsInt, IsNotEmpty, IsString, Min } from 'class-validator'
+import { IsInt, IsEnum, Max, IsNotEmpty, IsString, Min } from 'class-validator'
+import { Currency } from '../enums/currency.enums'
+
 
 export class CreateCheckoutDto {
   @IsString()
@@ -7,11 +9,12 @@ export class CreateCheckoutDto {
 
   @IsInt()
   @Min(1)
-  amount: number
+  @Max(100000000)
+  amount: number // in cents
 
-  @IsString()
+  @IsEnum(Currency, { message: 'Currency must be either CAD or USD' })
   @IsNotEmpty()
-  currency: string
+  currency: Currency
 
   @IsString()
   @IsNotEmpty()
