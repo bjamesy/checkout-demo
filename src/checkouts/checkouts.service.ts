@@ -52,15 +52,35 @@ export class CheckoutsService {
 
     async processPayment(id: string) {
         const checkout = await this._getCheckout(id)
+
         if (!checkout) throw new NotFoundException('Checkout not found')
 
         if (checkout.status == CheckoutStatus.COMPLETED) {
             throw new BadRequestException(`Checkout ${id} already ${checkout.status}`)
         }
+        if (checkout.status == CheckoutStatus.PROCESSING) {
+            throw new BadRequestException(`Checkout ${id} currently ${checkout.status}`)
+        }
+
+        const processingCheckout = await this.prisma.checkout.update({
+            where: { id },
+            data: { status: CheckoutStatus.PROCESSING },
+        })   
+        if (!processingCheckout) {
+            console.log(`Failed to update ${checkout.id} to ${CheckoutStatus.PROCESSING}`)
+            throw new BadRequestException(`Checkout ${id} couldnt be processed`)
+        }
 
         // simulate async payment
         setTimeout(async () => {
             try {
+                // only update processing checkouts
+                const current = await this._getCheckout(id)
+                if (!current || current.status !== CheckoutStatus.PROCESSING) {
+                    console.log(`Checkout ${id} already updated, skipping async payment`)
+                    return
+                } 
+        
                 const isSuccess = Math.random() > 0.3 // 70% success rate
                 await this.prisma.checkout.update({
                     where: { id },
@@ -71,6 +91,6 @@ export class CheckoutsService {
             }
         }, 2000) // 2 second delay
 
-        return { ...checkout, status: checkout.status }
+        return { ...processingCheckout, status: processingCheckout.status }
     }
 }
