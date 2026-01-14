@@ -112,5 +112,6 @@ curl -X POST http://localhost:3000/checkouts/<checkout_id>/pay
 1. Send the **same POST /checkouts** request twice — it should return the **same checkout**.  
 2. Send **POST /checkouts/:id/pay** to trigger async payment.  
 3. Immediately GET `/checkouts/:id` — status will be `PROCESSING`.  
-4. Wait ~1 second, GET again — status should update to `COMPLETED` or `FAILED`.
+4. Wait ~2 seconds, GET again — status should update to `COMPLETED` or `FAILED`.
+   - `COMPLETED` is final status. `FAILED` can be retried. `PROCESSING` is blocking status
 
